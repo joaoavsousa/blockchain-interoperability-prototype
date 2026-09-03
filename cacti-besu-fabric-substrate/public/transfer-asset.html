@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Transfer Asset</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+	nav {
+	    margin-bottom: 30px;
+	}
+
+	nav a {
+	    margin-right: 16px;
+	}
+
+        input,
+        textarea,
+        button {
+            font: inherit;
+            padding: 10px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #status {
+            margin-top: 24px;
+            padding: 16px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+	<a href="/">Home</a>
+
+	<a href="/create-asset.html">
+	    Create Asset
+	</a>
+
+	<a href="/transfer-asset.html">
+	    Transfer Asset
+	</a>
+
+
+	<a href="/monitor.html">
+	    Monitor Transaction
+	</a>  
+    </nav>
+
+    <h1>Cross-Chain Asset Transfer</h1>
+
+    <p>
+        Transfer an asset through
+        Besu → Fabric → Substrate.
+    </p>
+
+    <form id="transfer-form">
+        <div>
+            <label for="assetId">
+                Asset ID
+            </label>
+
+            <input
+                id="assetId"
+                name="assetId"
+                type="text"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="amount">
+                Amount
+            </label>
+
+            <input
+                id="amount"
+                name="amount"
+                type="number"
+                min="1"
+                step="1"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="notes">
+                Notes
+            </label>
+
+            <textarea
+                id="notes"
+                name="notes"
+            ></textarea>
+        </div>
+
+        <button
+            id="submit-button"
+            type="submit"
+        >
+            Transfer asset
+        </button>
+    </form>
+
+    <section
+        id="status"
+        class="hidden"
+        aria-live="polite"
+    ></section>
+
+    <script>
+        "use strict";
+
+        const form =
+            document.getElementById(
+                "transfer-form",
+            );
+
+        const submitButton =
+            document.getElementById(
+                "submit-button",
+            );
+
+        const statusSection =
+            document.getElementById(
+                "status",
+            );
+
+        function showStatus(message) {
+            statusSection.textContent =
+                message;
+
+            statusSection.classList.remove(
+                "hidden",
+            );
+        }
+
+        form.addEventListener(
+            "submit",
+            async (event) => {
+                event.preventDefault();
+
+                const assetId =
+                    document
+                        .getElementById(
+                            "assetId",
+                        )
+                        .value
+                        .trim();
+
+                const amount =
+                    Number(
+                        document
+                            .getElementById(
+                                "amount",
+                            )
+                            .value,
+                    );
+
+                const notes =
+                    document
+                        .getElementById(
+                            "notes",
+                        )
+                        .value
+                        .trim();
+
+                submitButton.disabled =
+                    true;
+
+                showStatus(
+                    "Transfer in progress...\n\n" +
+                    "The operation may take several seconds.",
+                );
+
+                try {
+                    const response =
+                        await fetch(
+                            "/api/transfers",
+                            {
+                                method:
+                                    "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+                                },
+
+                                body:
+                                    JSON.stringify({
+                                        assetId,
+                                        amount,
+                                        notes,
+                                    }),
+                            },
+                        );
+
+                    const result =
+                        await response.json();
+
+                    if (
+                        !response.ok ||
+                        result.success !== true
+                    ) {
+                        throw new Error(
+                            result.error ||
+                            "The transfer failed.",
+                        );
+                    }
+
+                    showStatus(
+                        "Transfer completed successfully.\n\n" +
+                        `Transfer ID: ${result.transferId}\n` +
+                        `Destination transaction: ` +
+                        `${result.destinationTxHash}\n` +
+                        "Route: Besu → Fabric → Substrate",
+                    );
+
+                    form.reset();
+                } catch (error) {
+                    showStatus(
+                        "Transfer failed.\n\n" +
+                        error.message,
+                    );
+                } finally {
+                    submitButton.disabled =
+                        false;
+                }
+            },
+        );
+
+	const searchParameters =
+  new URLSearchParams(
+    window.location.search,
+  );
+
+const assetIdFromUrl =
+  searchParameters.get(
+    "assetId",
+  );
+
+if (assetIdFromUrl) {
+  document
+    .getElementById(
+      "assetId",
+    )
+    .value =
+      assetIdFromUrl;
+}
+    </script>
+</body>
+</html>

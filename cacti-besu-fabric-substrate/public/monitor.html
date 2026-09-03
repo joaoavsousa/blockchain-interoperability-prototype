@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Monitor Transfer</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            margin-bottom: 30px;
+        }
+
+        nav a {
+            margin-right: 16px;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        input,
+        button {
+            font: inherit;
+            padding: 10px;
+        }
+
+        input {
+            flex: 1;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #status {
+            margin-top: 20px;
+            padding: 16px;
+            border: 1px solid #ccc;
+        }
+
+        .transfer-card {
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .transfer-row {
+            margin-bottom: 16px;
+        }
+
+        .transfer-label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .transfer-value {
+            overflow-wrap: anywhere;
+        }
+
+        .success {
+            border-color: #348a46;
+        }
+
+        .error {
+            border-color: #b43131;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/">Home</a>
+
+        <a href="/create-asset.html">
+	    Create Asset
+	</a>
+
+        <a href="/transfer-asset.html">
+            Transfer Asset
+        </a>
+
+        <a href="/monitor.html">
+            Monitor Transfer
+        </a>
+    </nav>
+
+    <h1>Monitor Transfer</h1>
+
+    <p>
+        Enter a transfer ID stored in the Fabric relay ledger.
+    </p>
+
+    <form id="monitor-form">
+        <input
+            id="transferId"
+            name="transferId"
+            type="text"
+            placeholder="transfer-..."
+            required
+        >
+
+        <button
+            id="search-button"
+            type="submit"
+        >
+            Search
+        </button>
+    </form>
+
+    <section
+        id="status"
+        class="hidden"
+        aria-live="polite"
+    ></section>
+
+    <section
+        id="transfer-card"
+        class="transfer-card hidden"
+    >
+        <h2>Transfer Information</h2>
+
+        <div id="transfer-details"></div>
+    </section>
+
+    <script>
+        "use strict";
+
+        const form =
+            document.getElementById(
+                "monitor-form",
+            );
+
+        const transferIdInput =
+            document.getElementById(
+                "transferId",
+            );
+
+        const searchButton =
+            document.getElementById(
+                "search-button",
+            );
+
+        const statusSection =
+            document.getElementById(
+                "status",
+            );
+
+        const transferCard =
+            document.getElementById(
+                "transfer-card",
+            );
+
+        const transferDetails =
+            document.getElementById(
+                "transfer-details",
+            );
+
+        function showStatus(
+            message,
+            type = "",
+        ) {
+            statusSection.textContent =
+                message;
+
+            statusSection.className = "";
+
+            if (type) {
+                statusSection.classList.add(
+                    type,
+                );
+            }
+        }
+
+        function hideStatus() {
+            statusSection.className =
+                "hidden";
+        }
+
+        function formatValue(value) {
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return "Not available";
+            }
+
+            if (Array.isArray(value)) {
+                return value.join(" → ");
+            }
+
+            if (typeof value === "object") {
+                return JSON.stringify(
+                    value,
+                    null,
+                    2,
+                );
+            }
+
+            return String(value);
+        }
+
+        function addTransferRow(
+            label,
+            value,
+        ) {
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "transfer-row";
+
+            const labelElement =
+                document.createElement("span");
+
+            labelElement.className =
+                "transfer-label";
+
+            labelElement.textContent =
+                label;
+
+            const valueElement =
+                document.createElement("div");
+
+            valueElement.className =
+                "transfer-value";
+
+            valueElement.textContent =
+                formatValue(value);
+
+            row.appendChild(labelElement);
+            row.appendChild(valueElement);
+
+            transferDetails.appendChild(row);
+        }
+
+        function displayTransfer(
+            transfer,
+        ) {
+            transferDetails.innerHTML = "";
+
+            const fields = [
+                [
+                    "Transfer ID",
+                    transfer.transferId,
+                ],
+                [
+                    "Status",
+                    transfer.status,
+                ],
+                [
+                    "Asset ID",
+                    transfer.assetId,
+                ],
+                [
+                    "Amount",
+                    transfer.amount,
+                ],
+                [
+                    "Source Chain",
+                    transfer.sourceChain,
+                ],
+                [
+                    "Destination Chain",
+                    transfer.destinationChain,
+                ],
+                [
+                    "Source Transaction",
+                    transfer.sourceTxHash,
+                ],
+                [
+                    "Destination Transaction",
+                    transfer.destinationTxHash,
+                ],
+                [
+                    "DPP Hash",
+                    transfer.dppHash,
+                ],
+                [
+                    "Timestamp",
+                    transfer.timestamp,
+                ],
+                [
+                    "Notes",
+                    transfer.notes,
+                ],
+                [
+                    "Transfer Route",
+                    transfer.transfers,
+                ],
+            ];
+
+            for (
+                const [label, value]
+                of fields
+            ) {
+                addTransferRow(
+                    label,
+                    value,
+                );
+            }
+
+            transferCard.classList.remove(
+                "hidden",
+            );
+        }
+
+        async function searchTransfer(
+            transferId,
+        ) {
+            searchButton.disabled = true;
+            transferCard.classList.add(
+                "hidden",
+            );
+
+            showStatus(
+                "Searching Fabric relay ledger...",
+            );
+
+            try {
+                const response =
+                    await fetch(
+                        `/api/transfers/${
+                            encodeURIComponent(
+                                transferId,
+                            )
+                        }`,
+                    );
+
+                const result =
+                    await response.json();
+
+                if (
+                    !response.ok ||
+                    result.success !== true
+                ) {
+                    throw new Error(
+                        result.error ||
+                        "Transfer was not found.",
+                    );
+                }
+
+                displayTransfer(
+                    result.transfer,
+                );
+
+                showStatus(
+                    "Transfer found successfully.",
+                    "success",
+                );
+            } catch (error) {
+                showStatus(
+                    `Search failed.\n\n${
+                        error.message
+                    }`,
+                    "error",
+                );
+            } finally {
+                searchButton.disabled =
+                    false;
+            }
+        }
+
+        form.addEventListener(
+            "submit",
+            async (event) => {
+                event.preventDefault();
+
+                const transferId =
+                    transferIdInput
+                        .value
+                        .trim();
+
+                if (!transferId) {
+                    showStatus(
+                        "Transfer ID is required.",
+                        "error",
+                    );
+
+                    return;
+                }
+
+                await searchTransfer(
+                    transferId,
+                );
+            },
+        );
+
+        const searchParameters =
+            new URLSearchParams(
+                window.location.search,
+            );
+
+        const transferIdFromUrl =
+            searchParameters.get(
+                "transferId",
+            );
+
+        if (transferIdFromUrl) {
+            transferIdInput.value =
+                transferIdFromUrl;
+
+            searchTransfer(
+                transferIdFromUrl,
+            );
+        } else {
+            hideStatus();
+        }
+    </script>
+</body>
+</html>

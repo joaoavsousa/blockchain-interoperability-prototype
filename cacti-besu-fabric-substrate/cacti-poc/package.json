@@ -1,0 +1,17 @@
+{
+  "name": "cacti-poc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@hyperledger/cactus-plugin-keychain-memory": "^2.0.0",
+    "@hyperledger/cactus-plugin-ledger-connector-besu": "^2.0.0",
+    "@hyperledger/cactus-plugin-ledger-connector-fabric": "^2.0.0"
+  }
+}

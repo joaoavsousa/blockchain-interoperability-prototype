@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>View Digital Product Passport</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 960px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            margin-bottom: 30px;
+        }
+
+        nav a {
+            margin-right: 16px;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        input,
+        button {
+            font: inherit;
+            padding: 10px;
+        }
+
+        input {
+            flex: 1;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #status {
+            margin: 20px 0;
+            padding: 16px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            border-color: #348a46;
+        }
+
+        .error {
+            border-color: #b43131;
+        }
+
+        .card {
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(240px, 1fr)
+                );
+            gap: 18px;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .value {
+            overflow-wrap: anywhere;
+        }
+
+        .timeline {
+            border-left: 3px solid #ccc;
+            margin-left: 10px;
+            padding-left: 24px;
+        }
+
+        .timeline-entry {
+            position: relative;
+            margin-bottom: 28px;
+            padding: 16px;
+            border: 1px solid #ccc;
+        }
+
+        .timeline-entry::before {
+            content: "";
+            position: absolute;
+            left: -34px;
+            top: 20px;
+            width: 14px;
+            height: 14px;
+            border: 3px solid #555;
+            border-radius: 50%;
+            background: white;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+	.event-header {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: flex-start;
+	  gap: 16px;
+	  margin-bottom: 16px;
+	}
+
+	.event-header h3 {
+	  margin: 0;
+	}
+
+	.event-time {
+	  color: #616e7c;
+	  font-size: 0.9rem;
+	  white-space: nowrap;
+	}
+
+	.event-grid {
+	  display: grid;
+	  grid-template-columns:
+	    repeat(
+	      auto-fit,
+	      minmax(220px, 1fr)
+	    );
+	  gap: 14px 20px;
+	}
+
+	.event-field {
+	  min-width: 0;
+	}
+
+	.event-label {
+	  display: block;
+	  margin-bottom: 4px;
+	  color: #52606d;
+	  font-size: 0.8rem;
+	  font-weight: bold;
+	  text-transform: uppercase;
+	}
+
+	.event-value {
+	  overflow-wrap: anywhere;
+	}
+
+	.transfer-entry {
+	  margin-bottom: 18px;
+	  padding: 18px;
+	  border: 1px solid #d9e2ec;
+	  border-radius: 8px;
+	  background: #f8fafc;
+	}
+
+	.transfer-entry h3 {
+	  margin-top: 0;
+	}
+
+	@media (max-width: 600px) {
+	  .event-header {
+	    flex-direction: column;
+	  }
+
+	  .event-time {
+	    white-space: normal;
+	  }
+	}
+		
+	/* ==========================================================
+	   Grouped DPP summary
+	   ========================================================== */
+
+	.passport-groups {
+	  display: grid;
+	  grid-template-columns:
+	    repeat(
+	      auto-fit,
+	      minmax(260px, 1fr)
+	    );
+	  gap: 20px;
+	}
+
+	.summary-group {
+	  padding: 18px;
+	  border: 1px solid #d9e2ec;
+	  border-radius: 8px;
+	  background: #f8fafc;
+	}
+
+	.summary-group h3 {
+	  margin: 0 0 18px;
+	  padding-bottom: 10px;
+	  border-bottom: 1px solid #d9e2ec;
+	}
+
+	/* ==========================================================
+	   Status badge
+	   ========================================================== */
+
+	.status-badge {
+	  display: inline-block;
+	  padding: 5px 10px;
+	  border-radius: 999px;
+	  font-size: 0.82rem;
+	  font-weight: bold;
+	}
+
+	.status-active {
+	  background: #d9f2e6;
+	  color: #176b46;
+	}
+
+	.status-transfer {
+	  background: #fff3c4;
+	  color: #8a5a00;
+	}
+
+	.status-other {
+	  background: #e4e7eb;
+	  color: #3e4c59;
+	}
+
+	/* ==========================================================
+	   Hash and transaction values
+	   ========================================================== */
+
+	.hash-value {
+	  display: flex;
+	  align-items: center;
+	  flex-wrap: wrap;
+	  gap: 8px;
+	}
+
+	.copy-button {
+	  padding: 4px 8px;
+	  border: 1px solid #9aa5b1;
+	  border-radius: 4px;
+	  background: white;
+	  cursor: pointer;
+	  font-size: 0.78rem;
+	}
+
+	/* ==========================================================
+	   Lifecycle event types
+	   ========================================================== */
+
+	.event-title {
+	  display: flex;
+	  align-items: center;
+	  gap: 9px;
+	}
+
+	.event-icon {
+	  display: inline-flex;
+	  align-items: center;
+	  justify-content: center;
+	  width: 26px;
+	  height: 26px;
+	  border-radius: 50%;
+	  color: white;
+	  font-size: 0.82rem;
+	  font-weight: bold;
+	}
+
+	.event-created {
+	  background: #2680c2;
+	}
+
+	.event-started {
+	  background: #d69e2e;
+	}
+
+	.event-completed {
+	  background: #2f855a;
+	}
+
+	.event-default {
+	  background: #616e7c;
+	}
+
+	/* ==========================================================
+	   Lifecycle ribbon
+	   ========================================================== */
+
+	.lifecycle-ribbon {
+	  display: flex;
+	  align-items: stretch;
+	  gap: 0;
+	  overflow-x: auto;
+	  padding: 10px 0;
+	}
+
+	.lifecycle-step {
+	  position: relative;
+	  flex: 1;
+	  min-width: 180px;
+	  padding: 16px;
+	  border-top: 4px solid #9aa5b1;
+	  background: #f5f7fa;
+	}
+
+	.lifecycle-step:not(:last-child)::after {
+	  content: "→";
+	  position: absolute;
+	  right: -10px;
+	  top: 24px;
+	  z-index: 2;
+	  font-size: 1.2rem;
+	  font-weight: bold;
+	}
+
+	.lifecycle-step.completed {
+	  border-top-color: #2f855a;
+	  background: #edf9f2;
+	}
+
+	.lifecycle-step-title {
+	  margin-bottom: 6px;
+	  font-weight: bold;
+	}
+
+	.lifecycle-step-time {
+	  color: #616e7c;
+	  font-size: 0.82rem;
+	}
+
+	/* ==========================================================
+	   Verification indicator
+	   ========================================================== */
+
+	.verification-success {
+	  color: #176b46;
+	  font-weight: bold;
+	}
+
+	@media (max-width: 700px) {
+	  .lifecycle-ribbon {
+	    flex-direction: column;
+	    gap: 10px;
+	  }
+
+	  .lifecycle-step:not(:last-child)::after {
+	    content: "↓";
+	    right: auto;
+	    left: 20px;
+	    top: auto;
+	    bottom: -18px;
+	  }
+	}
+
+	.event-value {
+	  overflow-wrap: anywhere;
+	  white-space: pre-line;
+	}
+	
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/">Home</a>
+
+        <a href="/create-asset.html">
+            Create Asset
+        </a>
+
+        <a href="/transfer-asset.html">
+            Transfer Asset
+        </a>
+
+        <a href="/monitor.html">
+            Monitor Transfer
+        </a>
+
+        <a href="/view-dpp.html">
+            View DPP
+        </a>
+    </nav>
+
+    <h1>Digital Product Passport</h1>
+
+    <p>
+        Enter an asset ID to inspect its current passport
+        and lifecycle history.
+    </p>
+
+    <form id="search-form">
+        <input
+            id="assetId"
+            type="text"
+            placeholder="Asset ID"
+            required
+        >
+
+        <button
+            id="search-button"
+            type="submit"
+        >
+            Search
+        </button>
+    </form>
+
+    <section
+        id="status"
+        class="hidden"
+        aria-live="polite"
+    ></section>
+
+    <section
+        id="passport"
+        class="hidden"
+    >
+	<div class="card">
+	  <h2>Lifecycle Overview</h2>
+
+	  <div
+	    id="lifecycle-ribbon"
+	    class="lifecycle-ribbon"
+	  ></div>
+	</div>
+        <div class="card">
+            <h2>Current Passport State</h2>
+
+            <div
+                id="passport-summary"
+                class="passport-groups"
+            ></div>
+        </div>
+
+        <div class="card">
+            <h2>Lifecycle History</h2>
+
+            <div
+                id="history"
+                class="timeline"
+            ></div>
+        </div>
+
+        <div class="card">
+            <h2>Transfer History</h2>
+
+            <div id="transfers"></div>
+        </div>
+    </section>
+
+    <script>
+        "use strict";
+
+        const form =
+            document.getElementById(
+                "search-form",
+            );
+
+        const assetIdInput =
+            document.getElementById(
+                "assetId",
+            );
+
+        const searchButton =
+            document.getElementById(
+                "search-button",
+            );
+
+        const statusSection =
+            document.getElementById(
+                "status",
+            );
+
+        const passportSection =
+            document.getElementById(
+                "passport",
+            );
+
+        const summarySection =
+            document.getElementById(
+                "passport-summary",
+            );
+
+        const historySection =
+            document.getElementById(
+                "history",
+            );
+
+        const transfersSection =
+            document.getElementById(
+                "transfers",
+            );
+
+	const lifecycleRibbon =
+	    document.getElementById(
+		"lifecycle-ribbon",
+	    );
+
+        function showStatus(
+            message,
+            type = "",
+        ) {
+            statusSection.textContent =
+                message;
+
+            statusSection.className = "";
+
+            if (type) {
+                statusSection.classList.add(
+                    type,
+                );
+            }
+        }
+
+
+
+	function createSummaryGroup(
+	  title,
+	) {
+	  const group =
+	    document.createElement("section");
+
+	  group.className =
+	    "summary-group";
+
+	  const heading =
+	    document.createElement("h3");
+
+	  heading.textContent =
+	    title;
+
+	  group.appendChild(heading);
+
+	  summarySection.appendChild(group);
+
+	  return group;
+	}
+
+
+
+	function addSummaryField(
+	  container,
+	  label,
+	  value,
+	  options = {},
+	) {
+	  const field =
+	    document.createElement("div");
+
+	  field.className =
+	    "field";
+
+	  const labelElement =
+	    document.createElement("span");
+
+	  labelElement.className =
+	    "label";
+
+	  labelElement.textContent =
+	    label;
+
+	  const valueElement =
+	    document.createElement("div");
+
+	  valueElement.className =
+	    "value";
+
+	  if (options.status === true) {
+	    const badge =
+	      document.createElement("span");
+
+	    badge.className =
+	      `status-badge ${
+	        getStatusClass(value)
+	      }`;
+
+	    badge.textContent =
+	      value || "UNKNOWN";
+
+	    valueElement.appendChild(badge);
+	  } else if (
+	    options.copyable === true
+	  ) {
+	    valueElement.appendChild(
+	      createCopyableValue(value),
+	    );
+	  } else {
+	    valueElement.textContent =
+	      value ?? "Not available";
+	  }
+
+	  field.appendChild(
+	    labelElement,
+	  );
+
+	  field.appendChild(
+	    valueElement,
+	  );
+
+	  container.appendChild(field);
+	}
+
+	function getStatusClass(status) {
+	  if (status === "ACTIVE") {
+	    return "status-active";
+	  }
+
+	  if (status === "IN_TRANSFER") {
+	    return "status-transfer";
+	  }
+
+	  return "status-other";
+	}
+
+
+	function shortenHash(value) {
+	  if (!value) {
+	    return "Not available";
+	  }
+
+	  const text =
+	    String(value);
+
+	  if (text.length <= 24) {
+	    return text;
+	  }
+
+	  return (
+	    text.slice(0, 12) +
+	    "..." +
+	    text.slice(-10)
+	  );
+	}
+
+
+	function createCopyableValue(value) {
+	  const container =
+	    document.createElement("div");
+
+	  container.className =
+	    "hash-value";
+
+	  const text =
+	    document.createElement("span");
+
+	  text.textContent =
+	    shortenHash(value);
+
+	  text.title =
+	    value || "";
+
+	  container.appendChild(text);
+
+	  if (value) {
+	    const button =
+	      document.createElement("button");
+
+	    button.type =
+	      "button";
+
+	    button.className =
+	      "copy-button";
+
+	    button.textContent =
+	      "Copy";
+
+	    button.addEventListener(
+	      "click",
+	      async () => {
+	        try {
+	          await navigator.clipboard
+	            .writeText(value);
+
+	          button.textContent =
+	            "Copied";
+
+	          setTimeout(
+	            () => {
+	              button.textContent =
+	                "Copy";
+	            },
+	            1200,
+	          );
+	        } catch {
+	          button.textContent =
+	            "Copy failed";
+	        }
+	      },
+	    );
+
+	    container.appendChild(button);
+	  }
+
+	  return container;
+	}
+
+
+	function displaySummary(asset) {
+	  const dpp =
+	    asset.dpp;
+
+	  summarySection.innerHTML = "";
+
+	  const productGroup =
+	    createSummaryGroup(
+	      "Product",
+	    );
+
+	  addSummaryField(
+	    productGroup,
+	    "Asset ID",
+	    asset.assetId,
+	  );
+
+	  addSummaryField(
+	    productGroup,
+	    "Product name",
+	    dpp.product?.name,
+	  );
+
+	  addSummaryField(
+	    productGroup,
+	    "Serial number",
+	    dpp.product?.serialNumber,
+	  );
+
+	  addSummaryField(
+	    productGroup,
+	    "Batch number",
+	    dpp.product?.batchNumber,
+	  );
+
+	  addSummaryField(
+	    productGroup,
+	    "Origin",
+	    dpp.product?.origin,
+	  );
+
+	  addSummaryField(
+	    productGroup,
+	    "Production date",
+	    dpp.product?.productionDate,
+	  );
+
+	  const ownershipGroup =
+	    createSummaryGroup(
+	      "Ownership and Location",
+	    );
+
+	  addSummaryField(
+	    ownershipGroup,
+	    "Manufacturer",
+	    formatOwner(
+	      dpp.manufacturer,
+	    ),
+	  );
+
+	  addSummaryField(
+	    ownershipGroup,
+	    "Current owner",
+	    formatOwner(
+	      dpp.currentOwner,
+	    ),
+	  );
+
+	  addSummaryField(
+	    ownershipGroup,
+	    "Current chain",
+	    dpp.currentChain,
+	  );
+
+	  const integrityGroup =
+	    createSummaryGroup(
+	      "Integrity and State",
+	    );
+
+	  addSummaryField(
+	    integrityGroup,
+	    "Status",
+	    dpp.status,
+	    {
+	      status: true,
+	    },
+	  );
+
+	  addSummaryField(
+	    integrityGroup,
+	    "Metadata URI",
+	    dpp.metadataUri,
+	  );
+
+	  addSummaryField(
+	    integrityGroup,
+	    "Current DPP hash",
+	    asset.dppHash,
+	    {
+	      copyable: true,
+	    },
+	  );
+	}
+
+
+	function formatDateTime(value) {
+  if (!value) {
+    return "Not available";
+  }
+
+  const date =
+    new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime(),
+    )
+  ) {
+    return value;
+  }
+
+  return date.toLocaleString();
+}
+
+	function formatOwner(owner) {
+	  if (!owner) {
+	    return "Not available";
+	  }
+
+	  if (typeof owner === "string") {
+	    return owner;
+	  }
+
+	  const name =
+	    owner.name ||
+	    "Unnamed owner";
+
+	  const id =
+	    owner.id || "";
+
+	  if (
+	    id &&
+	    id !== name
+	  ) {
+	    return `${name}\n${id}`;
+	  }
+
+	  return name;
+	}
+
+	function addEventField(
+	  container,
+	  label,
+	  value,
+	  options = {},
+	) {
+	  if (
+	    value === undefined ||
+	    value === null ||
+	    value === ""
+	  ) {
+	    return;
+	  }
+
+	  const field =
+	    document.createElement("div");
+
+	  field.className =
+	    "event-field";
+
+	  const labelElement =
+	    document.createElement("span");
+
+	  labelElement.className =
+	    "event-label";
+
+	  labelElement.textContent =
+	    label;
+
+	  const valueElement =
+	    document.createElement("div");
+
+	  valueElement.className =
+	    "event-value";
+
+	  if (options.copyable === true) {
+	    valueElement.appendChild(
+	      createCopyableValue(
+	        String(value),
+	      ),
+	    );
+	  } else {
+	    valueElement.textContent =
+	      String(value);
+	  }
+
+	  field.appendChild(
+	    labelElement,
+	  );
+
+	  field.appendChild(
+	    valueElement,
+	  );
+
+	  container.appendChild(field);
+	}
+
+
+function getEventPresentation(
+  eventType,
+) {
+  switch (eventType) {
+    case "CREATED":
+      return {
+        icon: "C",
+        className:
+          "event-created",
+      };
+
+    case "TRANSFER_STARTED":
+      return {
+        icon: "→",
+        className:
+          "event-started",
+      };
+
+    case "TRANSFER_COMPLETED":
+      return {
+        icon: "✓",
+        className:
+          "event-completed",
+      };
+
+    default:
+      return {
+        icon: "•",
+        className:
+          "event-default",
+      };
+  }
+}
+
+function createLifecycleEntry(
+  event,
+) {
+  const entry =
+    document.createElement(
+      "article",
+    );
+
+  entry.className =
+    "timeline-entry";
+
+  const header =
+    document.createElement(
+      "div",
+    );
+
+  header.className =
+    "event-header";
+
+  const title =
+  document.createElement("h3");
+
+title.className =
+  "event-title";
+
+const presentation =
+  getEventPresentation(
+    event.type,
+  );
+
+const icon =
+  document.createElement("span");
+
+icon.className =
+  `event-icon ${
+    presentation.className
+  }`;
+
+icon.textContent =
+  presentation.icon;
+
+const titleText =
+  document.createElement("span");
+
+titleText.textContent =
+  String(
+    event.type ||
+    "Lifecycle event",
+  )
+    .replaceAll("_", " ");
+
+title.appendChild(icon);
+title.appendChild(titleText); 
+
+  const timestamp =
+    document.createElement(
+      "span",
+    );
+
+  timestamp.className =
+    "event-time";
+
+  timestamp.textContent =
+    formatDateTime(
+      event.timestamp,
+    );
+
+  header.appendChild(title);
+  header.appendChild(timestamp);
+
+  const details =
+    document.createElement(
+      "div",
+    );
+
+  details.className =
+    "event-grid";
+
+  addEventField(
+    details,
+    "Transfer ID",
+    event.transferId,
+  );
+
+  if (
+    event.sourceChain &&
+    event.destinationChain
+  ) {
+    addEventField(
+      details,
+      "Route",
+      [
+        event.sourceChain,
+	"Fabric",
+        event.destinationChain,
+      ].join(" → "),
+    );
+  }
+
+  addEventField(
+    details,
+    "Chain",
+    event.chain,
+  );
+
+  addEventField(
+    details,
+    "Amount",
+    event.amount,
+  );
+
+  if (
+    event.previousStatus ||
+    event.newStatus
+  ) {
+    addEventField(
+      details,
+      "Status transition",
+      [
+        event.previousStatus,
+        event.newStatus,
+      ]
+        .filter(Boolean)
+        .join(" → "),
+    );
+  }
+
+  addEventField(
+    details,
+    "Previous owner",
+    formatOwner(
+      event.previousOwner,
+    ),
+  );
+
+  addEventField(
+    details,
+    "New owner",
+    formatOwner(
+      event.newOwner,
+    ),
+  );
+
+  addEventField(
+    details,
+    "Owner",
+    formatOwner(
+      event.owner,
+    ),
+  );
+
+  addEventField(
+    details,
+    "Source transaction",
+    event.sourceTxHash,
+    {
+	copyable: true,
+    },
+  );
+
+  addEventField(
+    details,
+    "Destination transaction",
+    event.destinationTxHash,
+    {
+	copyable: true,
+    },
+  );
+
+  addEventField(
+    details,
+    "Notes",
+    event.notes,
+  );
+
+  entry.appendChild(header);
+  entry.appendChild(details);
+
+  return entry;
+}
+
+function displayLifecycleRibbon(
+  history,
+) {
+  lifecycleRibbon.innerHTML = "";
+
+  const lifecycleTypes = [
+    {
+      type: "CREATED",
+      title: "Asset Created",
+    },
+    {
+      type: "TRANSFER_STARTED",
+      title: "Transfer Started",
+    },
+    {
+      type: "TRANSFER_COMPLETED",
+      title: "Transfer Completed",
+    },
+  ];
+
+  for (
+    const lifecycleType
+    of lifecycleTypes
+  ) {
+    const matchingEvent =
+      history.find(
+        (event) =>
+          event.type ===
+          lifecycleType.type,
+      );
+
+    const step =
+      document.createElement(
+        "div",
+      );
+
+    step.className =
+      "lifecycle-step";
+
+    if (matchingEvent) {
+      step.classList.add(
+        "completed",
+      );
+    }
+
+    const title =
+      document.createElement(
+        "div",
+      );
+
+    title.className =
+      "lifecycle-step-title";
+
+    title.textContent =
+      matchingEvent
+        ? `✓ ${lifecycleType.title}`
+        : lifecycleType.title;
+
+    const time =
+      document.createElement(
+        "div",
+      );
+
+    time.className =
+      "lifecycle-step-time";
+
+    time.textContent =
+      matchingEvent
+        ? formatDateTime(
+            matchingEvent.timestamp,
+          )
+        : "Not reached";
+
+    step.appendChild(title);
+    step.appendChild(time);
+
+    lifecycleRibbon.appendChild(
+      step,
+    );
+  }
+}
+
+
+        function displayHistory(
+            history,
+        ) {
+            historySection.innerHTML = "";
+
+            if (
+                !Array.isArray(history) ||
+                history.length === 0
+            ) {
+                historySection.textContent =
+                    "No lifecycle events available.";
+
+                return;
+            }
+
+            for (const event of history) {
+                const entry =
+                    document.createElement(
+                        "article",
+                    );
+
+                entry.className =
+                    "timeline-entry";
+
+                const title =
+                    document.createElement(
+                        "h3",
+                    );
+
+                title.textContent =
+                    event.type ??
+                    "Lifecycle event";
+
+                const timestamp =
+                    document.createElement(
+                        "p",
+                    );
+
+                timestamp.textContent =
+                    event.timestamp ??
+                    "Timestamp unavailable";
+
+                const details =
+                    document.createElement(
+                        "pre",
+                    );
+
+                details.textContent =
+                    JSON.stringify(
+                        event,
+                        null,
+                        2,
+                    );
+
+                entry.appendChild(title);
+                entry.appendChild(timestamp);
+                entry.appendChild(details);
+
+                historySection.appendChild(
+                    entry,
+                );
+            }
+        }
+
+        function displayTransfers(
+  transfers,
+) {
+  transfersSection.innerHTML = "";
+
+  if (
+    !Array.isArray(transfers) ||
+    transfers.length === 0
+  ) {
+    transfersSection.textContent =
+      "No completed transfers available.";
+
+    return;
+  }
+
+  for (
+    const transfer
+    of transfers
+  ) {
+    const card =
+      document.createElement(
+        "article",
+      );
+
+    card.className =
+      "transfer-entry";
+
+    const title =
+      document.createElement(
+        "h3",
+      );
+
+    title.textContent =
+      `Transfer ${
+        transfer.transferId ||
+        ""
+      }`;
+
+    const details =
+      document.createElement(
+        "div",
+      );
+
+    details.className =
+      "event-grid";
+
+    addEventField(
+      details,
+      "Timestamp",
+      formatDateTime(
+        transfer.timestamp,
+      ),
+    );
+
+    addEventField(
+      details,
+      "Route",
+      [
+        transfer.sourceChain,
+	"Fabric",
+        transfer.destinationChain,
+      ]
+        .filter(Boolean)
+        .join(" → "),
+    );
+
+    addEventField(
+      details,
+      "Amount",
+      transfer.amount,
+    );
+
+    addEventField(
+	details,
+	"DPP integrity",
+	transfer.integrityVerified
+	   ? "✓ Verified"
+	   : "Not recorded",
+    );
+
+    addEventField(
+      details,
+      "Previous owner",
+      formatOwner(
+        transfer.previousOwner,
+      ),
+    );
+
+    addEventField(
+      details,
+      "New owner",
+      formatOwner(
+        transfer.newOwner,
+      ),
+    );
+
+    addEventField(
+      details,
+      "Source transaction",
+      transfer.sourceTxHash,
+      {
+	copyable: true,
+      },
+    );
+
+    addEventField(
+      details,
+      "Destination transaction",
+      transfer.destinationTxHash,
+	{
+	   copyable: true,
+	},
+    );
+
+    addEventField(
+      details,
+      "Notes",
+      transfer.notes,
+    );
+
+    card.appendChild(title);
+    card.appendChild(details);
+
+    transfersSection.appendChild(
+      card,
+    );
+  }
+}
+
+        function displayPassport(
+            asset,
+        ) {
+            displaySummary(asset);
+
+            displayHistory(
+                asset.dpp.history,
+            );
+
+	    displayLifecycleRibbon(
+		asset.dpp.history,
+	    );
+
+            displayTransfers(
+                asset.dpp.transfers,
+            );
+
+            passportSection.classList.remove(
+                "hidden",
+            );
+        }
+
+        async function searchDpp(
+            assetId,
+        ) {
+            searchButton.disabled =
+                true;
+
+            passportSection.classList.add(
+                "hidden",
+            );
+
+            showStatus(
+                "Loading Digital Product Passport...",
+            );
+
+            try {
+                const response =
+                    await fetch(
+                        `/api/assets/${
+                            encodeURIComponent(
+                                assetId,
+                            )
+                        }`,
+                    );
+
+                const result =
+                    await response.json();
+
+                if (
+                    !response.ok ||
+                    result.success !== true
+                ) {
+                    throw new Error(
+                        result.error ||
+                        "DPP lookup failed.",
+                    );
+                }
+
+                displayPassport(
+                    result.asset,
+                );
+
+                showStatus(
+                    "Digital Product Passport loaded successfully.",
+                    "success",
+                );
+            } catch (error) {
+                showStatus(
+                    `DPP lookup failed.\n\n${
+                        error.message
+                    }`,
+                    "error",
+                );
+            } finally {
+                searchButton.disabled =
+                    false;
+            }
+        }
+
+        form.addEventListener(
+            "submit",
+            async (event) => {
+                event.preventDefault();
+
+                const assetId =
+                    assetIdInput
+                        .value
+                        .trim();
+
+                if (!assetId) {
+                    showStatus(
+                        "Asset ID is required.",
+                        "error",
+                    );
+
+                    return;
+                }
+
+                await searchDpp(
+                    assetId,
+                );
+            },
+        );
+
+        const parameters =
+            new URLSearchParams(
+                window.location.search,
+            );
+
+        const assetIdFromUrl =
+            parameters.get(
+                "assetId",
+            );
+
+        if (assetIdFromUrl) {
+            assetIdInput.value =
+                assetIdFromUrl;
+
+            searchDpp(
+                assetIdFromUrl,
+            );
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Asset</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        nav {
+            margin-bottom: 30px;
+        }
+
+        nav a {
+            margin-right: 16px;
+        }
+
+        form {
+            display: grid;
+            gap: 18px;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 18px;
+        }
+
+        legend {
+            font-weight: bold;
+            padding: 0 8px;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(240px, 1fr)
+                );
+            gap: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        textarea,
+        button {
+            font: inherit;
+            padding: 10px;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #status {
+            margin-top: 24px;
+            padding: 16px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+        }
+
+        .success {
+            border-color: #348a46;
+        }
+
+        .error {
+            border-color: #b43131;
+        }
+
+        .result-card {
+            margin-top: 24px;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+
+        .result-row {
+            margin-bottom: 16px;
+        }
+
+        .result-label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .result-value {
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/">Home</a>
+
+        <a href="/create-asset.html">
+            Create Asset
+        </a>
+
+        <a href="/transfer-asset.html">
+            Transfer Asset
+        </a>
+
+        <a href="/monitor.html">
+            Monitor Transfer
+        </a>
+    </nav>
+
+    <h1>Create Asset</h1>
+
+    <p>
+        Create a new Digital Product Passport and mint
+        its initial representation on Besu.
+    </p>
+
+    <form id="asset-form">
+        <fieldset>
+            <legend>
+                Product identification
+            </legend>
+
+            <div class="field-grid">
+                <div class="field">
+                    <label for="assetId">
+                        Asset ID
+                    </label>
+
+                    <input
+                        id="assetId"
+                        name="assetId"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="productName">
+                        Product name
+                    </label>
+
+                    <input
+                        id="productName"
+                        name="productName"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="serialNumber">
+                        Serial number
+                    </label>
+
+                    <input
+                        id="serialNumber"
+                        name="serialNumber"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="batchNumber">
+                        Batch number
+                    </label>
+
+                    <input
+                        id="batchNumber"
+                        name="batchNumber"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="productionDate">
+                        Production date
+                    </label>
+
+                    <input
+                        id="productionDate"
+                        name="productionDate"
+                        type="date"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="origin">
+                        Origin
+                    </label>
+
+                    <input
+                        id="origin"
+                        name="origin"
+                        type="text"
+                        required
+                    >
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>
+                Manufacturer
+            </legend>
+
+            <div class="field-grid">
+                <div class="field">
+                    <label for="manufacturerId">
+                        Manufacturer ID
+                    </label>
+
+                    <input
+                        id="manufacturerId"
+                        name="manufacturerId"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="manufacturerName">
+                        Manufacturer name
+                    </label>
+
+                    <input
+                        id="manufacturerName"
+                        name="manufacturerName"
+                        type="text"
+                        required
+                    >
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>
+                Initial ownership
+            </legend>
+
+            <div class="field-grid">
+                <div class="field">
+                    <label for="ownerId">
+                        Owner ID
+                    </label>
+
+                    <input
+                        id="ownerId"
+                        name="ownerId"
+                        type="text"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="ownerName">
+                        Owner name
+                    </label>
+
+                    <input
+                        id="ownerName"
+                        name="ownerName"
+                        type="text"
+                        required
+                    >
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>
+                DPP and initial asset state
+            </legend>
+
+            <div class="field-grid">
+                <div class="field">
+                    <label for="metadataUri">
+                        Metadata URI
+                    </label>
+
+                    <input
+                        id="metadataUri"
+                        name="metadataUri"
+                        type="url"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="initialAmount">
+                        Initial amount
+                    </label>
+
+                    <input
+                        id="initialAmount"
+                        name="initialAmount"
+                        type="number"
+                        min="1"
+                        step="1"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="notes">
+                    Notes
+                </label>
+
+                <textarea
+                    id="notes"
+                    name="notes"
+                ></textarea>
+            </div>
+        </fieldset>
+
+        <button
+            id="submit-button"
+            type="submit"
+        >
+            Create asset
+        </button>
+    </form>
+
+    <section
+        id="status"
+        class="hidden"
+        aria-live="polite"
+    ></section>
+
+    <section
+        id="result-card"
+        class="result-card hidden"
+    >
+        <h2>Created Asset</h2>
+
+        <div id="result-details"></div>
+    </section>
+
+    <script>
+        "use strict";
+
+        const form =
+            document.getElementById(
+                "asset-form",
+            );
+
+        const submitButton =
+            document.getElementById(
+                "submit-button",
+            );
+
+        const statusSection =
+            document.getElementById(
+                "status",
+            );
+
+        const resultCard =
+            document.getElementById(
+                "result-card",
+            );
+
+        const resultDetails =
+            document.getElementById(
+                "result-details",
+            );
+
+        function showStatus(
+            message,
+            type = "",
+        ) {
+            statusSection.textContent =
+                message;
+
+            statusSection.className = "";
+
+            if (type) {
+                statusSection.classList.add(
+                    type,
+                );
+            }
+        }
+
+        function addResultRow(
+            label,
+            value,
+        ) {
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "result-row";
+
+            const labelElement =
+                document.createElement("span");
+
+            labelElement.className =
+                "result-label";
+
+            labelElement.textContent =
+                label;
+
+            const valueElement =
+                document.createElement("div");
+
+            valueElement.className =
+                "result-value";
+
+            valueElement.textContent =
+                value ?? "Not available";
+
+            row.appendChild(labelElement);
+            row.appendChild(valueElement);
+
+            resultDetails.appendChild(row);
+        }
+
+        function displayResult(asset) {
+            resultDetails.innerHTML = "";
+
+            addResultRow(
+                "Asset ID",
+                asset.assetId,
+            );
+
+            addResultRow(
+                "Product name",
+                asset.dpp?.product?.name,
+            );
+
+            addResultRow(
+                "Current owner",
+                asset.dpp?.currentOwner?.name,
+            );
+
+            addResultRow(
+                "Current chain",
+                asset.sourceChain,
+            );
+
+            addResultRow(
+                "Initial amount",
+                String(asset.initialAmount),
+            );
+
+            addResultRow(
+                "DPP hash",
+                asset.dppHash,
+            );
+
+            addResultRow(
+                "Besu transaction",
+                asset.sourceTxHash,
+            );
+
+            addResultRow(
+                "Initial lifecycle event",
+                asset.dpp?.history?.[0]?.type,
+            );
+
+            resultCard.classList.remove(
+                "hidden",
+            );
+        }
+
+        form.addEventListener(
+            "submit",
+            async (event) => {
+                event.preventDefault();
+
+                resultCard.classList.add(
+                    "hidden",
+                );
+
+                submitButton.disabled =
+                    true;
+
+                showStatus(
+                    "Creating the DPP and minting " +
+                    "the initial Besu representation...",
+                );
+
+                const request = {
+                    assetId:
+                        document
+                            .getElementById(
+                                "assetId",
+                            )
+                            .value
+                            .trim(),
+
+                    productName:
+                        document
+                            .getElementById(
+                                "productName",
+                            )
+                            .value
+                            .trim(),
+
+                    serialNumber:
+                        document
+                            .getElementById(
+                                "serialNumber",
+                            )
+                            .value
+                            .trim(),
+
+                    batchNumber:
+                        document
+                            .getElementById(
+                                "batchNumber",
+                            )
+                            .value
+                            .trim(),
+
+                    productionDate:
+                        document
+                            .getElementById(
+                                "productionDate",
+                            )
+                            .value,
+
+                    origin:
+                        document
+                            .getElementById(
+                                "origin",
+                            )
+                            .value
+                            .trim(),
+
+                    manufacturerId:
+                        document
+                            .getElementById(
+                                "manufacturerId",
+                            )
+                            .value
+                            .trim(),
+
+                    manufacturerName:
+                        document
+                            .getElementById(
+                                "manufacturerName",
+                            )
+                            .value
+                            .trim(),
+
+                    ownerId:
+                        document
+                            .getElementById(
+                                "ownerId",
+                            )
+                            .value
+                            .trim(),
+
+                    ownerName:
+                        document
+                            .getElementById(
+                                "ownerName",
+                            )
+                            .value
+                            .trim(),
+
+                    metadataUri:
+                        document
+                            .getElementById(
+                                "metadataUri",
+                            )
+                            .value
+                            .trim(),
+
+                    initialAmount:
+                        Number(
+                            document
+                                .getElementById(
+                                    "initialAmount",
+                                )
+                                .value,
+                        ),
+
+                    notes:
+                        document
+                            .getElementById(
+                                "notes",
+                            )
+                            .value
+                            .trim(),
+                };
+
+                try {
+                    const response =
+                        await fetch(
+                            "/api/assets",
+                            {
+                                method:
+                                    "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json",
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        request,
+                                    ),
+                            },
+                        );
+
+                    const result =
+                        await response.json();
+
+                    if (
+                        !response.ok ||
+                        result.success !== true
+                    ) {
+                        throw new Error(
+                            result.error ||
+                            "Asset creation failed.",
+                        );
+                    }
+
+                    displayResult(
+                        result.asset,
+                    );
+
+                    showStatus(
+                        "Asset and Digital Product Passport " +
+                        "created successfully.",
+                        "success",
+                    );
+
+                    form.reset();
+                } catch (error) {
+                    showStatus(
+                        `Asset creation failed.\n\n${
+                            error.message
+                        }`,
+                        "error",
+                    );
+                } finally {
+                    submitButton.disabled =
+                        false;
+                }
+            },
+        );
+    </script>
+</body>
+</html>
